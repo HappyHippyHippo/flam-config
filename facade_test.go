@@ -1,4 +1,4 @@
-package tests
+package config
 
 import (
 	"errors"
@@ -11,11 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/dig"
 
-	flam "github.com/happyhippyhippo/flam"
-	config "github.com/happyhippyhippo/flam-config"
-	mocks "github.com/happyhippyhippo/flam-config/tests/mocks"
+	"github.com/happyhippyhippo/flam"
 	filesystem "github.com/happyhippyhippo/flam-filesystem"
-	flamTime "github.com/happyhippyhippo/flam-time"
+	fileTime "github.com/happyhippyhippo/flam-time"
 )
 
 func Test_Facade_Entries(t *testing.T) {
@@ -23,14 +21,14 @@ func Test_Facade_Entries(t *testing.T) {
 	defer ctrl.Finish()
 
 	container := dig.New()
-	require.NoError(t, config.NewProvider().Register(container))
+	require.NoError(t, NewProvider().Register(container))
 
 	data := flam.Bag{"field1": "value1", "field2": "value2"}
-	source := mocks.NewSource(ctrl)
-	source.EXPECT().Get("", flam.Bag{}).Return(data).Times(1)
+	src := NewSourceMock(ctrl)
+	src.EXPECT().Get("", flam.Bag{}).Return(data).Times(1)
 
-	assert.NoError(t, container.Invoke(func(facade config.Facade) {
-		require.NoError(t, facade.AddSource("source", source))
+	assert.NoError(t, container.Invoke(func(facade Facade) {
+		require.NoError(t, facade.AddSource("source", src))
 
 		assert.ElementsMatch(t, []string{"field1", "field2"}, facade.Entries())
 	}))
@@ -41,14 +39,14 @@ func Test_Facade_Has(t *testing.T) {
 	defer ctrl.Finish()
 
 	container := dig.New()
-	require.NoError(t, config.NewProvider().Register(container))
+	require.NoError(t, NewProvider().Register(container))
 
 	data := flam.Bag{"field1": "value1", "field2": "value2"}
-	source := mocks.NewSource(ctrl)
-	source.EXPECT().Get("", flam.Bag{}).Return(data).Times(1)
+	src := NewSourceMock(ctrl)
+	src.EXPECT().Get("", flam.Bag{}).Return(data).Times(1)
 
-	assert.NoError(t, container.Invoke(func(facade config.Facade) {
-		require.NoError(t, facade.AddSource("source", source))
+	assert.NoError(t, container.Invoke(func(facade Facade) {
+		require.NoError(t, facade.AddSource("source", src))
 
 		assert.True(t, facade.Has("field1"))
 		assert.False(t, facade.Has("invalid"))
@@ -96,13 +94,13 @@ func Test_Facade_Get(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Get(scenario.path, scenario.def...))
 			}))
@@ -164,13 +162,13 @@ func Test_Facade_Bool(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Bool(scenario.path, scenario.def...))
 			}))
@@ -232,13 +230,13 @@ func Test_Facade_Int(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Int(scenario.path, scenario.def...))
 			}))
@@ -300,13 +298,13 @@ func Test_Facade_Int8(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Int8(scenario.path, scenario.def...))
 			}))
@@ -368,13 +366,13 @@ func Test_Facade_Int16(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Int16(scenario.path, scenario.def...))
 			}))
@@ -436,13 +434,13 @@ func Test_Facade_Int32(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Int32(scenario.path, scenario.def...))
 			}))
@@ -504,13 +502,13 @@ func Test_Facade_Int64(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Int64(scenario.path, scenario.def...))
 			}))
@@ -572,13 +570,13 @@ func Test_Facade_Uint(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Uint(scenario.path, scenario.def...))
 			}))
@@ -640,13 +638,13 @@ func Test_Facade_Uint8(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Uint8(scenario.path, scenario.def...))
 			}))
@@ -708,13 +706,13 @@ func Test_Facade_Uint16(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Uint16(scenario.path, scenario.def...))
 			}))
@@ -776,13 +774,13 @@ func Test_Facade_Uint32(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Uint32(scenario.path, scenario.def...))
 			}))
@@ -844,13 +842,13 @@ func Test_Facade_Uint64(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Uint64(scenario.path, scenario.def...))
 			}))
@@ -912,13 +910,13 @@ func Test_Facade_Float32(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Float32(scenario.path, scenario.def...))
 			}))
@@ -980,13 +978,13 @@ func Test_Facade_Float64(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Float64(scenario.path, scenario.def...))
 			}))
@@ -1048,13 +1046,13 @@ func Test_Facade_String(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.String(scenario.path, scenario.def...))
 			}))
@@ -1116,13 +1114,13 @@ func Test_Facade_StringMap(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.StringMap(scenario.path, scenario.def...))
 			}))
@@ -1184,13 +1182,13 @@ func Test_Facade_StringMapString(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.StringMapString(scenario.path, scenario.def...))
 			}))
@@ -1252,13 +1250,13 @@ func Test_Facade_Slice(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Slice(scenario.path, scenario.def...))
 			}))
@@ -1320,13 +1318,13 @@ func Test_Facade_StringSlice(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.StringSlice(scenario.path, scenario.def...))
 			}))
@@ -1400,13 +1398,13 @@ func Test_Facade_Duration(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Duration(scenario.path, scenario.def...))
 			}))
@@ -1468,13 +1466,13 @@ func Test_Facade_Bag(t *testing.T) {
 			defer ctrl.Finish()
 
 			container := dig.New()
-			require.NoError(t, config.NewProvider().Register(container))
+			require.NoError(t, NewProvider().Register(container))
 
-			source := mocks.NewSource(ctrl)
-			source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+			src := NewSourceMock(ctrl)
+			src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-			assert.NoError(t, container.Invoke(func(facade config.Facade) {
-				require.NoError(t, facade.AddSource("source", source))
+			assert.NoError(t, container.Invoke(func(facade Facade) {
+				require.NoError(t, facade.AddSource("source", src))
 
 				assert.Equal(t, scenario.expected, facade.Bag(scenario.path, scenario.def...))
 			}))
@@ -1485,18 +1483,18 @@ func Test_Facade_Bag(t *testing.T) {
 func Test_Facade_Set(t *testing.T) {
 	t.Run("should return error if passed an invalid path to save", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			assert.ErrorIs(t, facade.Set("", flam.Bag{}), flam.ErrBagInvalidPath)
 		}))
 	})
 
 	t.Run("should correctly save a value", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.Set("field1", "value1"))
 			assert.Equal(t, "value1", facade.Get("field1"))
 		}))
@@ -1555,13 +1553,13 @@ func Test_Facade_Populate(t *testing.T) {
 				defer ctrl.Finish()
 
 				container := dig.New()
-				require.NoError(t, config.NewProvider().Register(container))
+				require.NoError(t, NewProvider().Register(container))
 
-				source := mocks.NewSource(ctrl)
-				source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+				src := NewSourceMock(ctrl)
+				src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-				assert.NoError(t, container.Invoke(func(facade config.Facade) {
-					require.NoError(t, facade.AddSource("source", source))
+				assert.NoError(t, container.Invoke(func(facade Facade) {
+					require.NoError(t, facade.AddSource("source", src))
 
 					e := facade.Populate(scenario.target)
 
@@ -1629,13 +1627,13 @@ func Test_Facade_Populate(t *testing.T) {
 				defer ctrl.Finish()
 
 				container := dig.New()
-				require.NoError(t, config.NewProvider().Register(container))
+				require.NoError(t, NewProvider().Register(container))
 
-				source := mocks.NewSource(ctrl)
-				source.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
+				src := NewSourceMock(ctrl)
+				src.EXPECT().Get("", flam.Bag{}).Return(scenario.data).Times(1)
 
-				assert.NoError(t, container.Invoke(func(facade config.Facade) {
-					require.NoError(t, facade.AddSource("source", source))
+				assert.NoError(t, container.Invoke(func(facade Facade) {
+					require.NoError(t, facade.AddSource("source", src))
 
 					e := facade.Populate(scenario.target, scenario.path)
 
@@ -1655,9 +1653,9 @@ func Test_Facade_Populate(t *testing.T) {
 func Test_Facade_HasParser(t *testing.T) {
 	t.Run("should return false on unknown parser", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			assert.False(t, facade.HasParser("unknown"))
 		}))
 	})
@@ -1667,16 +1665,16 @@ func Test_Facade_HasParser(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		cfg := flam.Bag{"parser": flam.Bag{}}
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
-		factoryConfig.EXPECT().Get(config.PathParsers).Return(cfg).Times(1)
+		factoryCfg := NewFactoryConfigMock(ctrl)
+		factoryCfg.EXPECT().Get(PathParsers).Return(cfg).Times(1)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			assert.True(t, facade.HasParser("parser"))
 		}))
 	})
@@ -1686,18 +1684,18 @@ func Test_Facade_HasParser(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		cfg := flam.Bag{}
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
-		factoryConfig.EXPECT().Get(config.PathParsers).Return(cfg).Times(1)
+		factoryCfg := NewFactoryConfigMock(ctrl)
+		factoryCfg.EXPECT().Get(PathParsers).Return(cfg).Times(1)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
-		parser := mocks.NewParser(ctrl)
+		parser := NewParserMock(ctrl)
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddParser("parser", parser))
 
 			assert.True(t, facade.HasParser("parser"))
@@ -1711,16 +1709,16 @@ func Test_Facade_ListParsers(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		cfg := flam.Bag{}
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
-		factoryConfig.EXPECT().Get(config.PathParsers).Return(cfg).Times(1)
+		factoryCfg := NewFactoryConfigMock(ctrl)
+		factoryCfg.EXPECT().Get(PathParsers).Return(cfg).Times(1)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			assert.Empty(t, facade.ListParsers())
 		}))
 	})
@@ -1730,18 +1728,18 @@ func Test_Facade_ListParsers(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		cfg := flam.Bag{}
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
-		factoryConfig.EXPECT().Get(config.PathParsers).Return(cfg).Times(3)
+		factoryCfg := NewFactoryConfigMock(ctrl)
+		factoryCfg.EXPECT().Get(PathParsers).Return(cfg).Times(3)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
-			require.NoError(t, facade.AddParser("parser1", mocks.NewParser(ctrl)))
-			require.NoError(t, facade.AddParser("parser2", mocks.NewParser(ctrl)))
+		assert.NoError(t, container.Invoke(func(facade Facade) {
+			require.NoError(t, facade.AddParser("parser1", NewParserMock(ctrl)))
+			require.NoError(t, facade.AddParser("parser2", NewParserMock(ctrl)))
 
 			assert.ElementsMatch(t, []string{"parser1", "parser2"}, facade.ListParsers())
 		}))
@@ -1752,16 +1750,16 @@ func Test_Facade_ListParsers(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		cfg := flam.Bag{"parser1": flam.Bag{}, "parser2": flam.Bag{}}
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
-		factoryConfig.EXPECT().Get(config.PathParsers).Return(cfg).Times(1)
+		factoryCfg := NewFactoryConfigMock(ctrl)
+		factoryCfg.EXPECT().Get(PathParsers).Return(cfg).Times(1)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			assert.ElementsMatch(t, []string{"parser1", "parser2"}, facade.ListParsers())
 		}))
 	})
@@ -1771,17 +1769,17 @@ func Test_Facade_ListParsers(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		cfg := flam.Bag{"parser1": flam.Bag{}, "parser3": flam.Bag{}}
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
-		factoryConfig.EXPECT().Get(config.PathParsers).Return(cfg).Times(2)
+		factoryCfg := NewFactoryConfigMock(ctrl)
+		factoryCfg.EXPECT().Get(PathParsers).Return(cfg).Times(2)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
-			require.NoError(t, facade.AddParser("parser2", mocks.NewParser(ctrl)))
+		assert.NoError(t, container.Invoke(func(facade Facade) {
+			require.NoError(t, facade.AddParser("parser2", NewParserMock(ctrl)))
 
 			assert.ElementsMatch(t, []string{"parser1", "parser2", "parser3"}, facade.ListParsers())
 		}))
@@ -1794,16 +1792,16 @@ func Test_Facade_GetParser(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		cfg := flam.Bag{}
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
-		factoryConfig.EXPECT().Get(config.PathParsers).Return(cfg).Times(1)
+		factoryCfg := NewFactoryConfigMock(ctrl)
+		factoryCfg.EXPECT().Get(PathParsers).Return(cfg).Times(1)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetParser("unknown")
 			assert.Nil(t, got)
 			assert.ErrorIs(t, e, flam.ErrUnknownResource)
@@ -1815,16 +1813,16 @@ func Test_Facade_GetParser(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		cfg := flam.Bag{"parser": flam.Bag{"driver": "mock"}}
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
-		factoryConfig.EXPECT().Get(config.PathParsers).Return(cfg).Times(1)
+		factoryCfg := NewFactoryConfigMock(ctrl)
+		factoryCfg.EXPECT().Get(PathParsers).Return(cfg).Times(1)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetParser("parser")
 			assert.Nil(t, got)
 			assert.ErrorIs(t, e, flam.ErrInvalidResourceConfig)
@@ -1836,25 +1834,25 @@ func Test_Facade_GetParser(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		cfg := flam.Bag{"parser": flam.Bag{"driver": "mock"}}
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
-		factoryConfig.EXPECT().Get(config.PathParsers).Return(cfg).Times(1)
+		factoryCfg := NewFactoryConfigMock(ctrl)
+		factoryCfg.EXPECT().Get(PathParsers).Return(cfg).Times(1)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
 		parserCreatorConfig := flam.Bag{"id": "parser", "driver": "mock"}
 		expectedErr := errors.New("expected error")
-		parserCreator := mocks.NewParserCreator(ctrl)
+		parserCreator := NewParserCreatorMock(ctrl)
 		parserCreator.EXPECT().Accept(parserCreatorConfig).Return(true).Times(1)
 		parserCreator.EXPECT().Create(parserCreatorConfig).Return(nil, expectedErr).Times(1)
-		require.NoError(t, container.Provide(func() config.ParserCreator {
+		require.NoError(t, container.Provide(func() ParserCreator {
 			return parserCreator
-		}, dig.Group(config.ParserCreatorGroup)))
+		}, dig.Group(ParserCreatorGroup)))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetParser("parser")
 			assert.Nil(t, got)
 			assert.ErrorIs(t, e, expectedErr)
@@ -1866,16 +1864,16 @@ func Test_Facade_GetParser(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		cfg := flam.Bag{"parser": flam.Bag{"driver": config.ParserDriverJson}}
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
-		factoryConfig.EXPECT().Get(config.PathParsers).Return(cfg).Times(1)
+		cfg := flam.Bag{"parser": flam.Bag{"driver": ParserDriverJson}}
+		factoryCfg := NewFactoryConfigMock(ctrl)
+		factoryCfg.EXPECT().Get(PathParsers).Return(cfg).Times(1)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetParser("parser")
 			assert.NotNil(t, got)
 			assert.NoError(t, e)
@@ -1887,16 +1885,16 @@ func Test_Facade_GetParser(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		cfg := flam.Bag{"parser": flam.Bag{"driver": config.ParserDriverYaml}}
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
-		factoryConfig.EXPECT().Get(config.PathParsers).Return(cfg).Times(1)
+		cfg := flam.Bag{"parser": flam.Bag{"driver": ParserDriverYaml}}
+		factoryCfg := NewFactoryConfigMock(ctrl)
+		factoryCfg.EXPECT().Get(PathParsers).Return(cfg).Times(1)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetParser("parser")
 			assert.NotNil(t, got)
 			assert.NoError(t, e)
@@ -1910,14 +1908,14 @@ func Test_Facade_AddParser(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
+		factoryCfg := NewFactoryConfigMock(ctrl)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			assert.ErrorIs(t, facade.AddParser("parser", nil), flam.ErrNilReference)
 		}))
 	})
@@ -1927,18 +1925,18 @@ func Test_Facade_AddParser(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		cfg := flam.Bag{}
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
-		factoryConfig.EXPECT().Get(config.PathParsers).Return(cfg).Times(1)
+		factoryCfg := NewFactoryConfigMock(ctrl)
+		factoryCfg.EXPECT().Get(PathParsers).Return(cfg).Times(1)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
-		parser := mocks.NewParser(ctrl)
+		parser := NewParserMock(ctrl)
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddParser("parser", parser))
 
 			got, e := facade.GetParser("parser")
@@ -1952,18 +1950,18 @@ func Test_Facade_AddParser(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		cfg := flam.Bag{"parser": flam.Bag{"driver": "mock"}}
-		factoryConfig := mocks.NewFactoryConfig(ctrl)
-		factoryConfig.EXPECT().Get(config.PathParsers).Return(cfg).Times(1)
+		factoryCfg := NewFactoryConfigMock(ctrl)
+		factoryCfg.EXPECT().Get(PathParsers).Return(cfg).Times(1)
 		require.NoError(t, container.Decorate(func(flam.FactoryConfig) flam.FactoryConfig {
-			return factoryConfig
+			return factoryCfg
 		}))
 
-		parser := mocks.NewParser(ctrl)
+		parser := NewParserMock(ctrl)
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			assert.ErrorIs(t, facade.AddParser("parser", parser), flam.ErrDuplicateResource)
 		}))
 	})
@@ -1972,19 +1970,19 @@ func Test_Facade_AddParser(t *testing.T) {
 func Test_Facade_HasSource(t *testing.T) {
 	t.Run("should return false on unknown source", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			assert.False(t, facade.HasSource("unknown"))
 		}))
 	})
 
 	t.Run("should return false if the source is on config but not loaded", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
-			require.NoError(t, facade.Set(config.PathSources, flam.Bag{
+		assert.NoError(t, container.Invoke(func(facade Facade) {
+			require.NoError(t, facade.Set(PathSources, flam.Bag{
 				"my_source": flam.Bag{
 					"driver": "mock",
 				}}))
@@ -1998,13 +1996,13 @@ func Test_Facade_HasSource(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		source := mocks.NewSource(ctrl)
-		source.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{}).Times(1)
+		src := NewSourceMock(ctrl)
+		src.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{}).Times(1)
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
-			require.NoError(t, facade.AddSource("source", source))
+		assert.NoError(t, container.Invoke(func(facade Facade) {
+			require.NoError(t, facade.AddSource("source", src))
 
 			assert.True(t, facade.HasSource("source"))
 		}))
@@ -2014,9 +2012,9 @@ func Test_Facade_HasSource(t *testing.T) {
 func Test_Facade_ListSources(t *testing.T) {
 	t.Run("should return an empty list if no sources were added", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			assert.Empty(t, facade.ListSources())
 		}))
 	})
@@ -2026,21 +2024,21 @@ func Test_Facade_ListSources(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		source1 := mocks.NewSource(ctrl)
+		source1 := NewSourceMock(ctrl)
 		source1.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{}).AnyTimes()
 		source1.EXPECT().GetPriority().Return(1).AnyTimes()
 
-		source2 := mocks.NewSource(ctrl)
+		source2 := NewSourceMock(ctrl)
 		source2.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{}).AnyTimes()
 		source2.EXPECT().GetPriority().Return(2).AnyTimes()
 
-		source3 := mocks.NewSource(ctrl)
+		source3 := NewSourceMock(ctrl)
 		source3.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{}).AnyTimes()
 		source3.EXPECT().GetPriority().Return(3).AnyTimes()
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddSource("zulu", source3))
 			require.NoError(t, facade.AddSource("alpha", source1))
 			require.NoError(t, facade.AddSource("charlie", source2))
@@ -2053,12 +2051,12 @@ func Test_Facade_ListSources(t *testing.T) {
 func Test_Facade_GetSource(t *testing.T) {
 	t.Run("should return error on unknown source", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("unknown")
 			assert.Nil(t, got)
-			assert.ErrorIs(t, e, config.ErrSourceNotFound)
+			assert.ErrorIs(t, e, ErrSourceNotFound)
 		}))
 	})
 
@@ -2067,17 +2065,17 @@ func Test_Facade_GetSource(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		source := mocks.NewSource(ctrl)
-		source.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{}).AnyTimes()
-		source.EXPECT().GetPriority().Return(1).AnyTimes()
+		src := NewSourceMock(ctrl)
+		src.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{}).AnyTimes()
+		src.EXPECT().GetPriority().Return(1).AnyTimes()
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
-			require.NoError(t, facade.AddSource("source", source))
+		assert.NoError(t, container.Invoke(func(facade Facade) {
+			require.NoError(t, facade.AddSource("source", src))
 
 			got, e := facade.GetSource("source")
-			assert.Same(t, source, got)
+			assert.Same(t, src, got)
 			assert.NoError(t, e)
 		}))
 	})
@@ -2086,9 +2084,9 @@ func Test_Facade_GetSource(t *testing.T) {
 func Test_Facade_AddSource(t *testing.T) {
 	t.Run("should return error on nil source", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			assert.ErrorIs(t, facade.AddSource("source", nil), flam.ErrNilReference)
 		}))
 	})
@@ -2098,15 +2096,15 @@ func Test_Facade_AddSource(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		source := mocks.NewSource(ctrl)
-		source.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{}).AnyTimes()
-		source.EXPECT().GetPriority().Return(1).AnyTimes()
+		src := NewSourceMock(ctrl)
+		src.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{}).AnyTimes()
+		src.EXPECT().GetPriority().Return(1).AnyTimes()
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
-			require.NoError(t, facade.AddSource("source", source))
-			assert.ErrorIs(t, facade.AddSource("source", source), config.ErrDuplicateSource)
+		assert.NoError(t, container.Invoke(func(facade Facade) {
+			require.NoError(t, facade.AddSource("source", src))
+			assert.ErrorIs(t, facade.AddSource("source", src), ErrDuplicateSource)
 		}))
 	})
 
@@ -2115,17 +2113,17 @@ func Test_Facade_AddSource(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		source := mocks.NewSource(ctrl)
-		source.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{}).AnyTimes()
-		source.EXPECT().GetPriority().Return(1).AnyTimes()
+		src := NewSourceMock(ctrl)
+		src.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{}).AnyTimes()
+		src.EXPECT().GetPriority().Return(1).AnyTimes()
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
-			require.NoError(t, facade.AddSource("source", source))
+		assert.NoError(t, container.Invoke(func(facade Facade) {
+			require.NoError(t, facade.AddSource("source", src))
 
 			got, e := facade.GetSource("source")
-			assert.Same(t, source, got)
+			assert.Same(t, src, got)
 			assert.NoError(t, e)
 		}))
 	})
@@ -2135,17 +2133,17 @@ func Test_Facade_AddSource(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		source1 := mocks.NewSource(ctrl)
+		source1 := NewSourceMock(ctrl)
 		source1.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).AnyTimes()
 		source1.EXPECT().GetPriority().Return(1).AnyTimes()
 
-		source2 := mocks.NewSource(ctrl)
+		source2 := NewSourceMock(ctrl)
 		source2.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value2"}).AnyTimes()
 		source2.EXPECT().GetPriority().Return(2).AnyTimes()
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddSource("source1", source1))
 
 			got, e := facade.GetSource("source1")
@@ -2166,10 +2164,10 @@ func Test_Facade_AddSource(t *testing.T) {
 func Test_Facade_SetSourcePriority(t *testing.T) {
 	t.Run("should return error on invalid source", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
-			assert.ErrorIs(t, facade.SetSourcePriority("source", 1), config.ErrSourceNotFound)
+		assert.NoError(t, container.Invoke(func(facade Facade) {
+			assert.ErrorIs(t, facade.SetSourcePriority("source", 1), ErrSourceNotFound)
 		}))
 	})
 
@@ -2178,9 +2176,9 @@ func Test_Facade_SetSourcePriority(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		source1 := mocks.NewSource(ctrl)
+		source1 := NewSourceMock(ctrl)
 		source1.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).AnyTimes()
 		gomock.InOrder(
 			source1.EXPECT().GetPriority().Return(1),
@@ -2188,11 +2186,11 @@ func Test_Facade_SetSourcePriority(t *testing.T) {
 		)
 		source1.EXPECT().SetPriority(3).AnyTimes()
 
-		source2 := mocks.NewSource(ctrl)
+		source2 := NewSourceMock(ctrl)
 		source2.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value2"}).AnyTimes()
 		source2.EXPECT().GetPriority().Return(2).AnyTimes()
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddSource("source1", source1))
 			assert.Equal(t, "value1", facade.Get("field"))
 
@@ -2215,11 +2213,11 @@ func Test_Facade_SetSourcePriority(t *testing.T) {
 			_ = os.Unsetenv("ENV_FIELD_2")
 		}()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source_1": flam.Bag{
-				"driver":   config.SourceDriverEnv,
+				"driver":   SourceDriverEnv,
 				"priority": 1,
 				"files":    []string{},
 				"mappings": flam.Bag{
@@ -2227,23 +2225,23 @@ func Test_Facade_SetSourcePriority(t *testing.T) {
 				},
 			},
 			"my_source_2": flam.Bag{
-				"driver":   config.SourceDriverEnv,
+				"driver":   SourceDriverEnv,
 				"priority": 2,
 				"files":    []string{},
 				"mappings": flam.Bag{
 					"ENV_FIELD_2": "env.field",
 				},
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
-		require.NoError(t, flamTime.NewProvider().Register(container))
+		require.NoError(t, fileTime.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			assert.Equal(t, "value_2", facade.Get("env.field"))
 
 			require.NoError(t, facade.SetSourcePriority("my_source_1", 3))
@@ -2255,10 +2253,10 @@ func Test_Facade_SetSourcePriority(t *testing.T) {
 func Test_Facade_RemoveSource(t *testing.T) {
 	t.Run("should return error on invalid source", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
-			assert.ErrorIs(t, facade.RemoveSource("source"), config.ErrSourceNotFound)
+		assert.NoError(t, container.Invoke(func(facade Facade) {
+			assert.ErrorIs(t, facade.RemoveSource("source"), ErrSourceNotFound)
 		}))
 	})
 
@@ -2267,19 +2265,19 @@ func Test_Facade_RemoveSource(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		source1 := mocks.NewSource(ctrl)
+		source1 := NewSourceMock(ctrl)
 		source1.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).AnyTimes()
 		source1.EXPECT().GetPriority().Return(1).AnyTimes()
 
 		expectedErr := errors.New("close error")
-		source2 := mocks.NewSource(ctrl)
+		source2 := NewSourceMock(ctrl)
 		source2.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value2"}).AnyTimes()
 		source2.EXPECT().GetPriority().Return(2).AnyTimes()
 		source2.EXPECT().Close().Return(expectedErr).Times(1)
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddSource("source1", source1))
 			assert.Equal(t, "value1", facade.Get("field"))
 
@@ -2296,19 +2294,19 @@ func Test_Facade_RemoveSource(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		source1 := mocks.NewSource(ctrl)
+		source1 := NewSourceMock(ctrl)
 		source1.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).AnyTimes()
 		source1.EXPECT().GetPriority().Return(1).AnyTimes()
 		source1.EXPECT().Close().Return(nil).AnyTimes()
 
-		source2 := mocks.NewSource(ctrl)
+		source2 := NewSourceMock(ctrl)
 		source2.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value2"}).AnyTimes()
 		source2.EXPECT().GetPriority().Return(2).AnyTimes()
 		source2.EXPECT().Close().Return(nil).AnyTimes()
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddSource("source1", source1))
 			assert.Equal(t, "value1", facade.Get("field"))
 
@@ -2327,15 +2325,15 @@ func Test_Facade_RemoveAllSources(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		expectedErr := errors.New("close error")
-		source := mocks.NewSource(ctrl)
-		source.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"})
-		source.EXPECT().Close().Return(expectedErr)
+		src := NewSourceMock(ctrl)
+		src.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"})
+		src.EXPECT().Close().Return(expectedErr)
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
-			require.NoError(t, facade.AddSource("source", source))
+		assert.NoError(t, container.Invoke(func(facade Facade) {
+			require.NoError(t, facade.AddSource("source", src))
 
 			assert.ErrorIs(t, facade.RemoveAllSources(), expectedErr)
 		}))
@@ -2346,19 +2344,19 @@ func Test_Facade_RemoveAllSources(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		source1 := mocks.NewSource(ctrl)
+		source1 := NewSourceMock(ctrl)
 		source1.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).AnyTimes()
 		source1.EXPECT().GetPriority().Return(1).AnyTimes()
 		source1.EXPECT().Close().Return(nil).Times(1)
 
-		source2 := mocks.NewSource(ctrl)
+		source2 := NewSourceMock(ctrl)
 		source2.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value2"}).AnyTimes()
 		source2.EXPECT().GetPriority().Return(1).AnyTimes()
 		source2.EXPECT().Close().Return(nil).Times(1)
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddSource("source1", source1))
 			require.NoError(t, facade.AddSource("source2", source2))
 
@@ -2376,14 +2374,14 @@ func Test_Facade_ReloadSources(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		source := mocks.NewSource(ctrl)
-		source.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).AnyTimes()
-		source.EXPECT().GetPriority().Return(1).AnyTimes()
+		src := NewSourceMock(ctrl)
+		src.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).AnyTimes()
+		src.EXPECT().GetPriority().Return(1).AnyTimes()
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
-			require.NoError(t, facade.AddSource("source", source))
+		assert.NoError(t, container.Invoke(func(facade Facade) {
+			require.NoError(t, facade.AddSource("source", src))
 
 			assert.NoError(t, facade.ReloadSources())
 		}))
@@ -2394,14 +2392,14 @@ func Test_Facade_ReloadSources(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		source := mocks.NewObservableSource(ctrl)
-		source.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).Times(1)
-		source.EXPECT().Reload().Return(false, nil).Times(1)
+		src := NewObservableSourceMock(ctrl)
+		src.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).Times(1)
+		src.EXPECT().Reload().Return(false, nil).Times(1)
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
-			require.NoError(t, facade.AddSource("source", source))
+		assert.NoError(t, container.Invoke(func(facade Facade) {
+			require.NoError(t, facade.AddSource("source", src))
 
 			assert.NoError(t, facade.ReloadSources())
 		}))
@@ -2412,15 +2410,15 @@ func Test_Facade_ReloadSources(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		expectedErr := errors.New("reload error")
-		source := mocks.NewObservableSource(ctrl)
-		source.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).Times(1)
-		source.EXPECT().Reload().Return(false, expectedErr).Times(1)
+		src := NewObservableSourceMock(ctrl)
+		src.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).Times(1)
+		src.EXPECT().Reload().Return(false, expectedErr).Times(1)
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
-			require.NoError(t, facade.AddSource("source", source))
+		assert.NoError(t, container.Invoke(func(facade Facade) {
+			require.NoError(t, facade.AddSource("source", src))
 
 			assert.ErrorIs(t, facade.ReloadSources(), expectedErr)
 		}))
@@ -2431,22 +2429,22 @@ func Test_Facade_ReloadSources(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		source1 := mocks.NewObservableSource(ctrl)
+		source1 := NewObservableSourceMock(ctrl)
 		source1.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field1": "value-y"})
 		source1.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field1": "value-y"})
 		source1.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field1": "value-y", "field2": "value2"})
 		source1.EXPECT().GetPriority().Return(1).AnyTimes()
 		source1.EXPECT().Reload().Return(true, nil).Times(1)
 
-		source2 := mocks.NewObservableSource(ctrl)
+		source2 := NewObservableSourceMock(ctrl)
 		source2.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field1": "value-x"})
 		source2.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field1": "value-x", "field3": "value3"})
 		source2.EXPECT().GetPriority().Return(2).AnyTimes()
 		source2.EXPECT().Reload().Return(true, nil).Times(1)
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddSource("source1", source1))
 			require.NoError(t, facade.AddSource("source2", source2))
 
@@ -2465,11 +2463,11 @@ func Test_Facade_ReloadSources(t *testing.T) {
 func Test_Facade_HasObserver(t *testing.T) {
 	t.Run("should return false if the observer is not present", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		observer := config.Observer(func(old any, new any) {})
+		observer := Observer(func(old any, new any) {})
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddObserver("id", "field", observer))
 			assert.False(t, facade.HasObserver("other", "field"))
 			assert.False(t, facade.HasObserver("id", "other"))
@@ -2478,11 +2476,11 @@ func Test_Facade_HasObserver(t *testing.T) {
 
 	t.Run("should return true if the observer is present", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		observer := config.Observer(func(old any, new any) {})
+		observer := Observer(func(old any, new any) {})
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddObserver("id", "field", observer))
 			assert.True(t, facade.HasObserver("id", "field"))
 		}))
@@ -2492,9 +2490,9 @@ func Test_Facade_HasObserver(t *testing.T) {
 func Test_Facade_AddObserver(t *testing.T) {
 	t.Run("should return error on nil callback", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			assert.ErrorIs(t, facade.AddObserver("", "", nil), flam.ErrNilReference)
 		}))
 	})
@@ -2504,13 +2502,13 @@ func Test_Facade_AddObserver(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		observer := config.Observer(func(old any, new any) {})
+		observer := Observer(func(old any, new any) {})
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddObserver("id", "field", observer))
-			assert.ErrorIs(t, facade.AddObserver("id", "field", observer), config.ErrDuplicateObserver)
+			assert.ErrorIs(t, facade.AddObserver("id", "field", observer), ErrDuplicateObserver)
 		}))
 	})
 
@@ -2519,22 +2517,22 @@ func Test_Facade_AddObserver(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		called := false
-		observer := config.Observer(func(old any, new any) {
+		observer := Observer(func(old any, new any) {
 			assert.Nil(t, old)
 			assert.Equal(t, "value1", new)
 			called = true
 		})
 
-		source := mocks.NewObservableSource(ctrl)
-		source.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).Times(1)
+		src := NewObservableSourceMock(ctrl)
+		src.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).Times(1)
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddObserver("id", "field", observer))
 
-			require.NoError(t, facade.AddSource("source", source))
+			require.NoError(t, facade.AddSource("source", src))
 			assert.True(t, called)
 			assert.Equal(t, "value1", facade.Get("field"))
 		}))
@@ -2544,9 +2542,9 @@ func Test_Facade_AddObserver(t *testing.T) {
 func Test_Facade_RemoveObserver(t *testing.T) {
 	t.Run("should no error if observer does not exist", func(t *testing.T) {
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.RemoveObserver("id"))
 		}))
 	})
@@ -2556,21 +2554,21 @@ func Test_Facade_RemoveObserver(t *testing.T) {
 		defer ctrl.Finish()
 
 		container := dig.New()
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		called := false
-		observer := config.Observer(func(old any, new any) {
+		observer := Observer(func(old any, new any) {
 			called = true
 		})
 
-		source := mocks.NewObservableSource(ctrl)
-		source.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).Times(1)
+		src := NewObservableSourceMock(ctrl)
+		src.EXPECT().Get("", flam.Bag{}).Return(flam.Bag{"field": "value1"}).Times(1)
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			require.NoError(t, facade.AddObserver("id", "field", observer))
 			require.NoError(t, facade.RemoveObserver("id"))
 
-			require.NoError(t, facade.AddSource("source", source))
+			require.NoError(t, facade.AddSource("source", src))
 
 			assert.False(t, called)
 			assert.Equal(t, "value1", facade.Get("field"))

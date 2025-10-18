@@ -1,4 +1,4 @@
-package tests
+package config
 
 import (
 	"os"
@@ -10,7 +10,6 @@ import (
 	"go.uber.org/dig"
 
 	flam "github.com/happyhippyhippo/flam"
-	config "github.com/happyhippyhippo/flam-config"
 	filesystem "github.com/happyhippyhippo/flam-filesystem"
 	time "github.com/happyhippyhippo/flam-time"
 )
@@ -20,24 +19,24 @@ func Test_envSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"defaults": flam.Bag{
-				"driver":   config.SourceDriverEnv,
+				"driver":   SourceDriverEnv,
 				"priority": 123,
 				"files":    []string{"./testdata/invalid"},
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, time.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		assert.ErrorContains(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			"no such file or directory")
 	})
 
@@ -48,11 +47,11 @@ func Test_envSource(t *testing.T) {
 		require.NoError(t, os.Setenv("ENV_SYSTEM_FIELD", "system_value"))
 		defer func() { _ = os.Unsetenv("ENV_SYSTEM_FIELD") }()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverEnv,
+				"driver":   SourceDriverEnv,
 				"priority": 123,
 				"files":    []string{"./testdata/env"},
 				"mappings": flam.Bag{
@@ -61,16 +60,16 @@ func Test_envSource(t *testing.T) {
 					"ENV_SYSTEM_INVALID": "env.invalid",
 				},
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, time.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)

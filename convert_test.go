@@ -1,4 +1,4 @@
-package tests
+package config
 
 import (
 	"testing"
@@ -6,7 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	flam "github.com/happyhippyhippo/flam"
-	config "github.com/happyhippyhippo/flam-config"
 )
 
 func Test_Convert(t *testing.T) {
@@ -64,7 +63,7 @@ func Test_Convert(t *testing.T) {
 
 	for _, scenario := range scenarios {
 		t.Run(scenario.name, func(t *testing.T) {
-			assert.Equal(t, scenario.want, config.Convert(scenario.val))
+			assert.Equal(t, scenario.want, Convert(scenario.val))
 		})
 	}
 }

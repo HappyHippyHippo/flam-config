@@ -1,0 +1,13 @@
+version: '3'
+
+tasks:
+  githooks:
+    desc: register the project githooks
+    preconditions:
+      - test -f ./.githooks/pre-commit
+    cmds:
+      - git config -f .gitconfig core.hooksPath .githooks   
+
+  default:
+    cmds:
+      - task --list-all

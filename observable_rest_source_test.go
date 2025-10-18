@@ -1,4 +1,4 @@
-package tests
+package config
 
 import (
 	"errors"
@@ -12,9 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/dig"
 
-	flam "github.com/happyhippyhippo/flam"
-	config "github.com/happyhippyhippo/flam-config"
-	mocks "github.com/happyhippyhippo/flam-config/tests/mocks"
+	"github.com/happyhippyhippo/flam"
 	filesystem "github.com/happyhippyhippo/flam-filesystem"
 	flamTime "github.com/happyhippyhippo/flam-time"
 )
@@ -24,25 +22,25 @@ func Test_observableRestSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			flam.ErrInvalidResourceConfig)
 	})
 
@@ -50,26 +48,26 @@ func Test_observableRestSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://path/",
 				"path":     flam.Bag{"timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			flam.ErrInvalidResourceConfig)
 	})
 
@@ -77,26 +75,26 @@ func Test_observableRestSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://path/",
 				"path":     flam.Bag{"config": "config"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			flam.ErrInvalidResourceConfig)
 	})
 
@@ -104,33 +102,33 @@ func Test_observableRestSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://path/",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		expectedErr := errors.New("requester error")
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(nil, expectedErr).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			expectedErr)
 	})
 
@@ -138,34 +136,34 @@ func Test_observableRestSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://path/",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			flam.ErrUnknownResource)
 	})
 
@@ -173,38 +171,38 @@ func Test_observableRestSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      ":/uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
 		assert.ErrorContains(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			"missing protocol scheme")
 	})
 
@@ -212,40 +210,40 @@ func Test_observableRestSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		expectedErr := errors.New("requester error")
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(nil, expectedErr).Times(1)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			expectedErr)
 	})
 
@@ -253,45 +251,45 @@ func Test_observableRestSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		expectedErr := errors.New("requester error")
-		body := mocks.NewReadCloser(ctrl)
+		body := NewReadCloserMock(ctrl)
 		body.EXPECT().Read(gomock.Any()).Return(0, expectedErr).Times(1)
 
 		response := &http.Response{Body: body}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response, nil).Times(1)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			expectedErr)
 	})
 
@@ -299,26 +297,26 @@ func Test_observableRestSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		data := "{"
 		reader := func(b []byte) (int, error) {
@@ -326,23 +324,23 @@ func Test_observableRestSource(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		body := mocks.NewReadCloser(ctrl)
+		body := NewReadCloserMock(ctrl)
 		body.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 
 		response := &http.Response{Body: body}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response, nil).Times(1)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
 		assert.ErrorContains(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			"unexpected end of JSON input")
 	})
 
@@ -350,26 +348,26 @@ func Test_observableRestSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		data := "{}"
 		reader := func(b []byte) (int, error) {
@@ -377,50 +375,50 @@ func Test_observableRestSource(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		body := mocks.NewReadCloser(ctrl)
+		body := NewReadCloserMock(ctrl)
 		body.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 
 		response := &http.Response{Body: body}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response, nil).Times(1)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
-			config.ErrRestTimestampNotFound)
+			NewProvider().(flam.BootableProvider).Boot(container),
+			ErrRestTimestampNotFound)
 	})
 
 	t.Run("should return invalid timestamp in response error (type)", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		data := "{\"timestamp\": 123}"
 		reader := func(b []byte) (int, error) {
@@ -428,52 +426,52 @@ func Test_observableRestSource(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		body := mocks.NewReadCloser(ctrl)
+		body := NewReadCloserMock(ctrl)
 		body.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 
 		response := &http.Response{Body: body}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response, nil).Times(1)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
-			config.ErrRestInvalidTimestamp)
+			NewProvider().(flam.BootableProvider).Boot(container),
+			ErrRestInvalidTimestamp)
 	})
 
 	t.Run("should return invalid timestamp in response error (string parsing)", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		expectedErr := errors.New("parse error")
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(time.Now()).Times(1)
 		timeFacade.EXPECT().Parse(time.RFC3339, "invalid").Return(time.Time{}, expectedErr).Times(1)
 		require.NoError(t, container.Provide(func() flamTime.Facade { return timeFacade }))
@@ -484,23 +482,23 @@ func Test_observableRestSource(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		body := mocks.NewReadCloser(ctrl)
+		body := NewReadCloserMock(ctrl)
 		body.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 
 		response := &http.Response{Body: body}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response, nil).Times(1)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			expectedErr)
 	})
 
@@ -508,28 +506,28 @@ func Test_observableRestSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		now := time.Now()
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(now).Times(1)
 		timeFacade.EXPECT().
 			Parse(time.RFC3339, "1234-56-78 90:12:34 +0000 UTC").
@@ -544,52 +542,52 @@ func Test_observableRestSource(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		body := mocks.NewReadCloser(ctrl)
+		body := NewReadCloserMock(ctrl)
 		body.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 
 		response := &http.Response{Body: body}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response, nil).Times(1)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
-			config.ErrRestConfigNotFound)
+			NewProvider().(flam.BootableProvider).Boot(container),
+			ErrRestConfigNotFound)
 	})
 
 	t.Run("should return invalid config in response error", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		now := time.Now()
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(now).Times(1)
 		timeFacade.EXPECT().
 			Parse(time.RFC3339, "1234-56-78 90:12:34 +0000 UTC").
@@ -604,52 +602,52 @@ func Test_observableRestSource(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		body := mocks.NewReadCloser(ctrl)
+		body := NewReadCloserMock(ctrl)
 		body.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 
 		response := &http.Response{Body: body}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response, nil).Times(1)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
-			config.ErrRestInvalidConfig)
+			NewProvider().(flam.BootableProvider).Boot(container),
+			ErrRestInvalidConfig)
 	})
 
 	t.Run("should correctly load the config", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		now := time.Now()
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(now).Times(1)
 		timeFacade.EXPECT().
 			Parse(time.RFC3339, "1234-56-78 90:12:34 +0000 UTC").
@@ -664,23 +662,23 @@ func Test_observableRestSource(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		body := mocks.NewReadCloser(ctrl)
+		body := NewReadCloserMock(ctrl)
 		body.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 
 		response := &http.Response{Body: body}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response, nil).Times(1)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			assert.NotNil(t, got)
 			assert.NoError(t, e)
@@ -695,28 +693,28 @@ func Test_observableRestSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		now := time.Now()
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(now).Times(1)
 		timeFacade.EXPECT().
 			Parse(time.RFC3339, "1234-56-78 90:12:34 +0000 UTC").
@@ -731,30 +729,30 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		body := mocks.NewReadCloser(ctrl)
+		body := NewReadCloserMock(ctrl)
 		body.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 
 		response := &http.Response{Body: body}
 
 		expectedErr := errors.New("requester error")
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response, nil)
 		requester.EXPECT().Do(gomock.Any()).Return(nil, expectedErr)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
 			assert.ErrorIs(t, e, expectedErr)
 		}))
@@ -764,28 +762,28 @@ func Test_observableRestSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		now := time.Now()
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(now).Times(1)
 		timeFacade.EXPECT().
 			Parse(time.RFC3339, "1234-56-78 90:12:34 +0000 UTC").
@@ -800,35 +798,35 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		body1 := mocks.NewReadCloser(ctrl)
+		body1 := NewReadCloserMock(ctrl)
 		body1.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 
 		expectedErr := errors.New("reader error")
-		body2 := mocks.NewReadCloser(ctrl)
+		body2 := NewReadCloserMock(ctrl)
 		body2.EXPECT().Read(gomock.Any()).Return(0, expectedErr).Times(1)
 
 		response1 := &http.Response{Body: body1}
 
 		response2 := &http.Response{Body: body2}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response1, nil)
 		requester.EXPECT().Do(gomock.Any()).Return(response2, nil)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
 			assert.ErrorIs(t, e, expectedErr)
 		}))
@@ -838,28 +836,28 @@ func Test_observableRestSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		now := time.Now()
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(now).Times(1)
 		timeFacade.EXPECT().
 			Parse(time.RFC3339, "1234-56-78 90:12:34 +0000 UTC").
@@ -874,7 +872,7 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data1), io.EOF
 		}
 
-		body1 := mocks.NewReadCloser(ctrl)
+		body1 := NewReadCloserMock(ctrl)
 		body1.EXPECT().Read(gomock.Any()).DoAndReturn(reader1).Times(1)
 
 		data2 := "{"
@@ -883,31 +881,31 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data2), io.EOF
 		}
 
-		body2 := mocks.NewReadCloser(ctrl)
+		body2 := NewReadCloserMock(ctrl)
 		body2.EXPECT().Read(gomock.Any()).DoAndReturn(reader2).Times(1)
 
 		response1 := &http.Response{Body: body1}
 
 		response2 := &http.Response{Body: body2}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response1, nil)
 		requester.EXPECT().Do(gomock.Any()).Return(response2, nil)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
 			assert.ErrorContains(t, e, "unexpected end of JSON input")
 		}))
@@ -917,28 +915,28 @@ func Test_observableRestSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		now := time.Now()
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(now).Times(1)
 		timeFacade.EXPECT().
 			Parse(time.RFC3339, "1234-56-78 90:12:34 +0000 UTC").
@@ -953,7 +951,7 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data1), io.EOF
 		}
 
-		body1 := mocks.NewReadCloser(ctrl)
+		body1 := NewReadCloserMock(ctrl)
 		body1.EXPECT().Read(gomock.Any()).DoAndReturn(reader1).Times(1)
 
 		data2 := "{}"
@@ -962,33 +960,33 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data2), io.EOF
 		}
 
-		body2 := mocks.NewReadCloser(ctrl)
+		body2 := NewReadCloserMock(ctrl)
 		body2.EXPECT().Read(gomock.Any()).DoAndReturn(reader2).Times(1)
 
 		response1 := &http.Response{Body: body1}
 
 		response2 := &http.Response{Body: body2}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response1, nil)
 		requester.EXPECT().Do(gomock.Any()).Return(response2, nil)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
-			assert.ErrorIs(t, e, config.ErrRestTimestampNotFound)
+			assert.ErrorIs(t, e, ErrRestTimestampNotFound)
 		}))
 	})
 
@@ -996,28 +994,28 @@ func Test_observableRestSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		now := time.Now()
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(now).Times(1)
 		timeFacade.EXPECT().
 			Parse(time.RFC3339, "1234-56-78 90:12:34 +0000 UTC").
@@ -1032,7 +1030,7 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data1), io.EOF
 		}
 
-		body1 := mocks.NewReadCloser(ctrl)
+		body1 := NewReadCloserMock(ctrl)
 		body1.EXPECT().Read(gomock.Any()).DoAndReturn(reader1).Times(1)
 
 		data2 := "{\"timestamp\": 1234567890}"
@@ -1041,33 +1039,33 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data2), io.EOF
 		}
 
-		body2 := mocks.NewReadCloser(ctrl)
+		body2 := NewReadCloserMock(ctrl)
 		body2.EXPECT().Read(gomock.Any()).DoAndReturn(reader2).Times(1)
 
 		response1 := &http.Response{Body: body1}
 
 		response2 := &http.Response{Body: body2}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response1, nil)
 		requester.EXPECT().Do(gomock.Any()).Return(response2, nil)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
-			assert.ErrorIs(t, e, config.ErrRestInvalidTimestamp)
+			assert.ErrorIs(t, e, ErrRestInvalidTimestamp)
 		}))
 	})
 
@@ -1075,29 +1073,29 @@ func Test_observableRestSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		expectedErr := errors.New("invalid timestamp")
 		now := time.Now()
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(now).Times(1)
 		timeFacade.EXPECT().
 			Parse(time.RFC3339, "1234-56-78 90:12:34 +0000 UTC").
@@ -1114,7 +1112,7 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data1), io.EOF
 		}
 
-		body1 := mocks.NewReadCloser(ctrl)
+		body1 := NewReadCloserMock(ctrl)
 		body1.EXPECT().Read(gomock.Any()).DoAndReturn(reader1).Times(1)
 
 		data2 := "{\"timestamp\": \"invalid\"}"
@@ -1123,31 +1121,31 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data2), io.EOF
 		}
 
-		body2 := mocks.NewReadCloser(ctrl)
+		body2 := NewReadCloserMock(ctrl)
 		body2.EXPECT().Read(gomock.Any()).DoAndReturn(reader2).Times(1)
 
 		response1 := &http.Response{Body: body1}
 
 		response2 := &http.Response{Body: body2}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response1, nil)
 		requester.EXPECT().Do(gomock.Any()).Return(response2, nil)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
 			assert.ErrorIs(t, e, expectedErr)
 		}))
@@ -1157,28 +1155,28 @@ func Test_observableRestSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		now := time.Now()
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(now).Times(1)
 		timeFacade.EXPECT().
 			Parse(time.RFC3339, "1234-56-78 90:12:34 +0000 UTC").
@@ -1195,7 +1193,7 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data1), io.EOF
 		}
 
-		body1 := mocks.NewReadCloser(ctrl)
+		body1 := NewReadCloserMock(ctrl)
 		body1.EXPECT().Read(gomock.Any()).DoAndReturn(reader1).Times(1)
 
 		data2 := "{\"timestamp\": \"1234-56-78 90:12:35 +0000 UTC\"}"
@@ -1204,33 +1202,33 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data2), io.EOF
 		}
 
-		body2 := mocks.NewReadCloser(ctrl)
+		body2 := NewReadCloserMock(ctrl)
 		body2.EXPECT().Read(gomock.Any()).DoAndReturn(reader2).Times(1)
 
 		response1 := &http.Response{Body: body1}
 
 		response2 := &http.Response{Body: body2}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response1, nil)
 		requester.EXPECT().Do(gomock.Any()).Return(response2, nil)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
-			assert.ErrorIs(t, e, config.ErrRestConfigNotFound)
+			assert.ErrorIs(t, e, ErrRestConfigNotFound)
 		}))
 	})
 
@@ -1238,28 +1236,28 @@ func Test_observableRestSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		now := time.Now()
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(now).Times(1)
 		timeFacade.EXPECT().
 			Parse(time.RFC3339, "1234-56-78 90:12:34 +0000 UTC").
@@ -1276,7 +1274,7 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data1), io.EOF
 		}
 
-		body1 := mocks.NewReadCloser(ctrl)
+		body1 := NewReadCloserMock(ctrl)
 		body1.EXPECT().Read(gomock.Any()).DoAndReturn(reader1).Times(1)
 
 		data2 := "{\"timestamp\": \"1234-56-78 90:12:35 +0000 UTC\", \"config\": 123}"
@@ -1285,62 +1283,62 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data2), io.EOF
 		}
 
-		body2 := mocks.NewReadCloser(ctrl)
+		body2 := NewReadCloserMock(ctrl)
 		body2.EXPECT().Read(gomock.Any()).DoAndReturn(reader2).Times(1)
 
 		response1 := &http.Response{Body: body1}
 
 		response2 := &http.Response{Body: body2}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response1, nil)
 		requester.EXPECT().Do(gomock.Any()).Return(response2, nil)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
-			assert.ErrorIs(t, e, config.ErrRestInvalidConfig)
+			assert.ErrorIs(t, e, ErrRestInvalidConfig)
 		}))
 	})
 
-	t.Run("should return invalid config in response error", func(t *testing.T) {
+	t.Run("should correctly reload the source", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		now := time.Now()
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(now).Times(1)
 		timeFacade.EXPECT().
 			Parse(time.RFC3339, "1234-56-78 90:12:34 +0000 UTC").
@@ -1357,7 +1355,7 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data1), io.EOF
 		}
 
-		body1 := mocks.NewReadCloser(ctrl)
+		body1 := NewReadCloserMock(ctrl)
 		body1.EXPECT().Read(gomock.Any()).DoAndReturn(reader1).Times(1)
 
 		data2 := "{\"timestamp\": \"1234-56-78 90:12:35 +0000 UTC\", \"config\": {\"field\": \"value2\"}}"
@@ -1366,31 +1364,31 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data2), io.EOF
 		}
 
-		body2 := mocks.NewReadCloser(ctrl)
+		body2 := NewReadCloserMock(ctrl)
 		body2.EXPECT().Read(gomock.Any()).DoAndReturn(reader2).Times(1)
 
 		response1 := &http.Response{Body: body1}
 
 		response2 := &http.Response{Body: body2}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response1, nil)
 		requester.EXPECT().Do(gomock.Any()).Return(response2, nil)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.True(t, reloaded)
 			assert.NoError(t, e)
 
@@ -1402,28 +1400,28 @@ func Test_observableRestSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverJson,
+				"driver": ParserDriverJson,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableRest,
+				"driver":   SourceDriverObservableRest,
 				"parser":   "my_parser",
 				"uri":      "http://uri",
 				"path":     flam.Bag{"config": "config", "timestamp": "timestamp"},
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		now := time.Now()
-		timeFacade := mocks.NewTimeFacade(ctrl)
+		timeFacade := NewTimeFacadeMock(ctrl)
 		timeFacade.EXPECT().Now().Return(now).Times(1)
 		timeFacade.EXPECT().
 			Parse(time.RFC3339, "1234-56-78 90:12:34 +0000 UTC").
@@ -1440,7 +1438,7 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data1), io.EOF
 		}
 
-		body1 := mocks.NewReadCloser(ctrl)
+		body1 := NewReadCloserMock(ctrl)
 		body1.EXPECT().Read(gomock.Any()).DoAndReturn(reader1).Times(1)
 
 		data2 := "{\"timestamp\": \"1234-56-78 90:12:35 +0000 UTC\", \"config\": {\"field\": \"value2\"}}"
@@ -1449,31 +1447,31 @@ func Test_observableRestSource_Reload(t *testing.T) {
 			return len(data2), io.EOF
 		}
 
-		body2 := mocks.NewReadCloser(ctrl)
+		body2 := NewReadCloserMock(ctrl)
 		body2.EXPECT().Read(gomock.Any()).DoAndReturn(reader2).Times(1)
 
 		response1 := &http.Response{Body: body1}
 
 		response2 := &http.Response{Body: body2}
 
-		requester := mocks.NewRestRequester(ctrl)
+		requester := NewRestRequesterMock(ctrl)
 		requester.EXPECT().Do(gomock.Any()).Return(response1, nil)
 		requester.EXPECT().Do(gomock.Any()).Return(response2, nil)
 
-		requestGenerator := mocks.NewRestRequesterGenerator(ctrl)
+		requestGenerator := NewRestRequesterGeneratorMock(ctrl)
 		requestGenerator.EXPECT().Create().Return(requester, nil).Times(1)
-		require.NoError(t, container.Decorate(func(generator config.RestRequesterGenerator) config.RestRequesterGenerator {
+		require.NoError(t, container.Decorate(func(generator RestRequesterGenerator) RestRequesterGenerator {
 			return requestGenerator
 		}))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
 			assert.NoError(t, e)
 

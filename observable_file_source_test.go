@@ -1,4 +1,4 @@
-package tests
+package config
 
 import (
 	"errors"
@@ -13,8 +13,6 @@ import (
 	"go.uber.org/dig"
 
 	flam "github.com/happyhippyhippo/flam"
-	config "github.com/happyhippyhippo/flam-config"
-	mocks "github.com/happyhippyhippo/flam-config/tests/mocks"
 	filesystem "github.com/happyhippyhippo/flam-filesystem"
 	flamTime "github.com/happyhippyhippo/flam-time"
 )
@@ -24,24 +22,24 @@ func Test_observableFileSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
 		require.NoError(t, filesystem.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			flam.ErrInvalidResourceConfig)
 	})
 
@@ -49,29 +47,29 @@ func Test_observableFileSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"path":     "./testdata/invalid",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		expectedErr := errors.New("filesystem error")
-		fsFacade := mocks.NewFileSystemFacade(ctrl)
+		fsFacade := NewFileSystemFacadeMock(ctrl)
 		fsFacade.EXPECT().GetDisk("my_disk").Return(nil, expectedErr).Times(1)
 		require.NoError(t, container.Provide(func() filesystem.Facade { return fsFacade }))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			expectedErr)
 	})
 
@@ -79,31 +77,31 @@ func Test_observableFileSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"parser":   "my_parser",
 				"path":     "/testdata/config",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
-		disk := mocks.NewDisk(ctrl)
+		disk := NewDiskMock(ctrl)
 
-		fsFacade := mocks.NewFileSystemFacade(ctrl)
+		fsFacade := NewFileSystemFacadeMock(ctrl)
 		fsFacade.EXPECT().GetDisk("my_disk").Return(disk, nil).Times(1)
 		require.NoError(t, container.Provide(func() filesystem.Facade { return fsFacade }))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			flam.ErrUnknownResource)
 	})
 
@@ -111,37 +109,37 @@ func Test_observableFileSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverYaml,
+				"driver": ParserDriverYaml,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"parser":   "my_parser",
 				"path":     "/testdata/config",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		expectedErr := errors.New("file error")
-		disk := mocks.NewDisk(ctrl)
+		disk := NewDiskMock(ctrl)
 		disk.EXPECT().Stat("/testdata/config").Return(nil, expectedErr).Times(1)
 
-		fsFacade := mocks.NewFileSystemFacade(ctrl)
+		fsFacade := NewFileSystemFacadeMock(ctrl)
 		fsFacade.EXPECT().GetDisk("my_disk").Return(disk, nil).Times(1)
 		require.NoError(t, container.Provide(func() filesystem.Facade { return fsFacade }))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			expectedErr)
 	})
 
@@ -149,45 +147,45 @@ func Test_observableFileSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverYaml,
+				"driver": ParserDriverYaml,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"parser":   "my_parser",
 				"path":     "/testdata/config",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		now := time.Now()
-		fileInfo := mocks.NewFileInfo(ctrl)
+		fileInfo := NewFileInfoMock(ctrl)
 		fileInfo.EXPECT().ModTime().Return(now).Times(1)
 
 		expectedErr := errors.New("file error")
-		disk := mocks.NewDisk(ctrl)
+		disk := NewDiskMock(ctrl)
 		disk.EXPECT().Stat("/testdata/config").Return(fileInfo, nil).Times(1)
 		disk.EXPECT().
 			OpenFile("/testdata/config", os.O_RDONLY, os.FileMode(0o644)).
 			Return(nil, expectedErr).
 			Times(1)
 
-		fsFacade := mocks.NewFileSystemFacade(ctrl)
+		fsFacade := NewFileSystemFacadeMock(ctrl)
 		fsFacade.EXPECT().GetDisk("my_disk").Return(disk, nil).Times(1)
 		require.NoError(t, container.Provide(func() filesystem.Facade { return fsFacade }))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			expectedErr)
 	})
 
@@ -195,49 +193,49 @@ func Test_observableFileSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverYaml,
+				"driver": ParserDriverYaml,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"parser":   "my_parser",
 				"path":     "/testdata/config",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		expectedErr := errors.New("file error")
-		file := mocks.NewFile(ctrl)
+		file := NewFileMock(ctrl)
 		file.EXPECT().Read(gomock.Any()).Return(0, expectedErr).Times(1)
 		file.EXPECT().Close().Return(nil).Times(1)
 
 		now := time.Now()
-		fileInfo := mocks.NewFileInfo(ctrl)
+		fileInfo := NewFileInfoMock(ctrl)
 		fileInfo.EXPECT().ModTime().Return(now).Times(1)
 
-		disk := mocks.NewDisk(ctrl)
+		disk := NewDiskMock(ctrl)
 		disk.EXPECT().Stat("/testdata/config").Return(fileInfo, nil).Times(1)
 		disk.EXPECT().
 			OpenFile("/testdata/config", os.O_RDONLY, os.FileMode(0o644)).
 			Return(file, nil).
 			Times(1)
 
-		fsFacade := mocks.NewFileSystemFacade(ctrl)
+		fsFacade := NewFileSystemFacadeMock(ctrl)
 		fsFacade.EXPECT().GetDisk("my_disk").Return(disk, nil).Times(1)
 		require.NoError(t, container.Provide(func() filesystem.Facade { return fsFacade }))
 
 		assert.ErrorIs(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			expectedErr)
 	})
 
@@ -245,25 +243,25 @@ func Test_observableFileSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverYaml,
+				"driver": ParserDriverYaml,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"parser":   "my_parser",
 				"path":     "/testdata/config",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		data := "{"
 		reader := func(b []byte) (int, error) {
@@ -271,28 +269,28 @@ func Test_observableFileSource(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		file := mocks.NewFile(ctrl)
+		file := NewFileMock(ctrl)
 		file.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 		file.EXPECT().Close().Return(nil).Times(1)
 
 		now := time.Now()
-		fileInfo := mocks.NewFileInfo(ctrl)
+		fileInfo := NewFileInfoMock(ctrl)
 		fileInfo.EXPECT().ModTime().Return(now).Times(1)
 
-		disk := mocks.NewDisk(ctrl)
+		disk := NewDiskMock(ctrl)
 		disk.EXPECT().Stat("/testdata/config").Return(fileInfo, nil).Times(1)
 		disk.EXPECT().
 			OpenFile("/testdata/config", os.O_RDONLY, os.FileMode(0o644)).
 			Return(file, nil).
 			Times(1)
 
-		fsFacade := mocks.NewFileSystemFacade(ctrl)
+		fsFacade := NewFileSystemFacadeMock(ctrl)
 		fsFacade.EXPECT().GetDisk("my_disk").Return(disk, nil).Times(1)
 		require.NoError(t, container.Provide(func() filesystem.Facade { return fsFacade }))
 
 		assert.ErrorContains(
 			t,
-			config.NewProvider().(flam.BootableProvider).Boot(container),
+			NewProvider().(flam.BootableProvider).Boot(container),
 			"yaml: line 1: did not find expected node content")
 	})
 
@@ -300,25 +298,25 @@ func Test_observableFileSource(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverYaml,
+				"driver": ParserDriverYaml,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"parser":   "my_parser",
 				"path":     "/testdata/config",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		data := "field: value"
 		reader := func(b []byte) (int, error) {
@@ -326,28 +324,28 @@ func Test_observableFileSource(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		file := mocks.NewFile(ctrl)
+		file := NewFileMock(ctrl)
 		file.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 		file.EXPECT().Close().Return(nil).Times(1)
 
 		now := time.Now()
-		fileInfo := mocks.NewFileInfo(ctrl)
+		fileInfo := NewFileInfoMock(ctrl)
 		fileInfo.EXPECT().ModTime().Return(now).Times(1)
 
-		disk := mocks.NewDisk(ctrl)
+		disk := NewDiskMock(ctrl)
 		disk.EXPECT().Stat("/testdata/config").Return(fileInfo, nil).Times(1)
 		disk.EXPECT().
 			OpenFile("/testdata/config", os.O_RDONLY, os.FileMode(0o644)).
 			Return(file, nil).
 			Times(1)
 
-		fsFacade := mocks.NewFileSystemFacade(ctrl)
+		fsFacade := NewFileSystemFacadeMock(ctrl)
 		fsFacade.EXPECT().GetDisk("my_disk").Return(disk, nil).Times(1)
 		require.NoError(t, container.Provide(func() filesystem.Facade { return fsFacade }))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
@@ -362,25 +360,25 @@ func Test_observableFileSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverYaml,
+				"driver": ParserDriverYaml,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"parser":   "my_parser",
 				"path":     "/testdata/config",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		data := "field: value"
 		reader := func(b []byte) (int, error) {
@@ -388,16 +386,16 @@ func Test_observableFileSource_Reload(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		file := mocks.NewFile(ctrl)
+		file := NewFileMock(ctrl)
 		file.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 		file.EXPECT().Close().Return(nil).Times(1)
 
 		now := time.Now()
-		fileInfo := mocks.NewFileInfo(ctrl)
+		fileInfo := NewFileInfoMock(ctrl)
 		fileInfo.EXPECT().ModTime().Return(now).Times(1)
 
 		expectedErr := errors.New("filesystem error")
-		disk := mocks.NewDisk(ctrl)
+		disk := NewDiskMock(ctrl)
 		disk.EXPECT().Stat("/testdata/config").Return(fileInfo, nil)
 		disk.EXPECT().Stat("/testdata/config").Return(nil, expectedErr)
 		disk.EXPECT().
@@ -405,18 +403,18 @@ func Test_observableFileSource_Reload(t *testing.T) {
 			Return(file, nil).
 			Times(1)
 
-		fsFacade := mocks.NewFileSystemFacade(ctrl)
+		fsFacade := NewFileSystemFacadeMock(ctrl)
 		fsFacade.EXPECT().GetDisk("my_disk").Return(disk, nil).Times(1)
 		require.NoError(t, container.Provide(func() filesystem.Facade { return fsFacade }))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
 			assert.ErrorIs(t, e, expectedErr)
 		}))
@@ -426,25 +424,25 @@ func Test_observableFileSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverYaml,
+				"driver": ParserDriverYaml,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"parser":   "my_parser",
 				"path":     "/testdata/config",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		data := "field: value"
 		reader := func(b []byte) (int, error) {
@@ -452,33 +450,33 @@ func Test_observableFileSource_Reload(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		file := mocks.NewFile(ctrl)
+		file := NewFileMock(ctrl)
 		file.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 		file.EXPECT().Close().Return(nil).Times(1)
 
 		now := time.Now()
-		fileInfo := mocks.NewFileInfo(ctrl)
+		fileInfo := NewFileInfoMock(ctrl)
 		fileInfo.EXPECT().ModTime().Return(now).Times(2)
 
-		disk := mocks.NewDisk(ctrl)
+		disk := NewDiskMock(ctrl)
 		disk.EXPECT().Stat("/testdata/config").Return(fileInfo, nil).Times(2)
 		disk.EXPECT().
 			OpenFile("/testdata/config", os.O_RDONLY, os.FileMode(0o644)).
 			Return(file, nil).
 			Times(1)
 
-		fsFacade := mocks.NewFileSystemFacade(ctrl)
+		fsFacade := NewFileSystemFacadeMock(ctrl)
 		fsFacade.EXPECT().GetDisk("my_disk").Return(disk, nil).Times(1)
 		require.NoError(t, container.Provide(func() filesystem.Facade { return fsFacade }))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
 			assert.NoError(t, e)
 		}))
@@ -488,25 +486,25 @@ func Test_observableFileSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverYaml,
+				"driver": ParserDriverYaml,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"parser":   "my_parser",
 				"path":     "/testdata/config",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		data := "field: value"
 		reader := func(b []byte) (int, error) {
@@ -514,18 +512,18 @@ func Test_observableFileSource_Reload(t *testing.T) {
 			return len(data), io.EOF
 		}
 
-		file := mocks.NewFile(ctrl)
+		file := NewFileMock(ctrl)
 		file.EXPECT().Read(gomock.Any()).DoAndReturn(reader).Times(1)
 		file.EXPECT().Close().Return(nil).Times(1)
 
 		now := time.Now()
 		future := now.AddDate(1, 0, 0)
-		fileInfo := mocks.NewFileInfo(ctrl)
+		fileInfo := NewFileInfoMock(ctrl)
 		fileInfo.EXPECT().ModTime().Return(now)
 		fileInfo.EXPECT().ModTime().Return(future)
 
 		expectedErr := errors.New("filesystem error")
-		disk := mocks.NewDisk(ctrl)
+		disk := NewDiskMock(ctrl)
 		disk.EXPECT().Stat("/testdata/config").Return(fileInfo, nil).Times(2)
 		disk.EXPECT().
 			OpenFile("/testdata/config", os.O_RDONLY, os.FileMode(0o644)).
@@ -535,18 +533,18 @@ func Test_observableFileSource_Reload(t *testing.T) {
 			OpenFile("/testdata/config", os.O_RDONLY, os.FileMode(0o644)).
 			Return(nil, expectedErr)
 
-		fsFacade := mocks.NewFileSystemFacade(ctrl)
+		fsFacade := NewFileSystemFacadeMock(ctrl)
 		fsFacade.EXPECT().GetDisk("my_disk").Return(disk, nil).Times(1)
 		require.NoError(t, container.Provide(func() filesystem.Facade { return fsFacade }))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
 			assert.ErrorIs(t, e, expectedErr)
 		}))
@@ -556,25 +554,25 @@ func Test_observableFileSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverYaml,
+				"driver": ParserDriverYaml,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"parser":   "my_parser",
 				"path":     "/testdata/config",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		data := "field: value"
 		reader := func(b []byte) (int, error) {
@@ -583,36 +581,36 @@ func Test_observableFileSource_Reload(t *testing.T) {
 		}
 
 		expectedErr := errors.New("filesystem error")
-		file := mocks.NewFile(ctrl)
+		file := NewFileMock(ctrl)
 		file.EXPECT().Read(gomock.Any()).DoAndReturn(reader)
 		file.EXPECT().Read(gomock.Any()).Return(0, expectedErr)
 		file.EXPECT().Close().Return(nil).Times(2)
 
 		now := time.Now()
 		future := now.AddDate(1, 0, 0)
-		fileInfo := mocks.NewFileInfo(ctrl)
+		fileInfo := NewFileInfoMock(ctrl)
 		fileInfo.EXPECT().ModTime().Return(now)
 		fileInfo.EXPECT().ModTime().Return(future)
 
-		disk := mocks.NewDisk(ctrl)
+		disk := NewDiskMock(ctrl)
 		disk.EXPECT().Stat("/testdata/config").Return(fileInfo, nil).Times(2)
 		disk.EXPECT().
 			OpenFile("/testdata/config", os.O_RDONLY, os.FileMode(0o644)).
 			Return(file, nil).
 			Times(2)
 
-		fsFacade := mocks.NewFileSystemFacade(ctrl)
+		fsFacade := NewFileSystemFacadeMock(ctrl)
 		fsFacade.EXPECT().GetDisk("my_disk").Return(disk, nil).Times(1)
 		require.NoError(t, container.Provide(func() filesystem.Facade { return fsFacade }))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
 			assert.ErrorIs(t, e, expectedErr)
 		}))
@@ -622,25 +620,25 @@ func Test_observableFileSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverYaml,
+				"driver": ParserDriverYaml,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"parser":   "my_parser",
 				"path":     "/testdata/config",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		data1 := "field: value"
 		reader1 := func(b []byte) (int, error) {
@@ -654,36 +652,36 @@ func Test_observableFileSource_Reload(t *testing.T) {
 			return len(data2), io.EOF
 		}
 
-		file := mocks.NewFile(ctrl)
+		file := NewFileMock(ctrl)
 		file.EXPECT().Read(gomock.Any()).DoAndReturn(reader1)
 		file.EXPECT().Read(gomock.Any()).DoAndReturn(reader2)
 		file.EXPECT().Close().Return(nil).Times(2)
 
 		now := time.Now()
 		future := now.AddDate(1, 0, 0)
-		fileInfo := mocks.NewFileInfo(ctrl)
+		fileInfo := NewFileInfoMock(ctrl)
 		fileInfo.EXPECT().ModTime().Return(now)
 		fileInfo.EXPECT().ModTime().Return(future)
 
-		disk := mocks.NewDisk(ctrl)
+		disk := NewDiskMock(ctrl)
 		disk.EXPECT().Stat("/testdata/config").Return(fileInfo, nil).Times(2)
 		disk.EXPECT().
 			OpenFile("/testdata/config", os.O_RDONLY, os.FileMode(0o644)).
 			Return(file, nil).
 			Times(2)
 
-		fsFacade := mocks.NewFileSystemFacade(ctrl)
+		fsFacade := NewFileSystemFacadeMock(ctrl)
 		fsFacade.EXPECT().GetDisk("my_disk").Return(disk, nil).Times(1)
 		require.NoError(t, container.Provide(func() filesystem.Facade { return fsFacade }))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			assert.False(t, reloaded)
 			assert.ErrorContains(t, e, "yaml: line 1: did not find expected node content")
 		}))
@@ -693,25 +691,25 @@ func Test_observableFileSource_Reload(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		config.Defaults = flam.Bag{}
-		_ = config.Defaults.Set(config.PathBoot, true)
-		_ = config.Defaults.Set(config.PathParsers, flam.Bag{
+		Defaults = flam.Bag{}
+		_ = Defaults.Set(PathBoot, true)
+		_ = Defaults.Set(PathParsers, flam.Bag{
 			"my_parser": flam.Bag{
-				"driver": config.ParserDriverYaml,
+				"driver": ParserDriverYaml,
 			}})
-		_ = config.Defaults.Set(config.PathSources, flam.Bag{
+		_ = Defaults.Set(PathSources, flam.Bag{
 			"my_source": flam.Bag{
-				"driver":   config.SourceDriverObservableFile,
+				"driver":   SourceDriverObservableFile,
 				"disk":     "my_disk",
 				"parser":   "my_parser",
 				"path":     "/testdata/config",
 				"priority": 123,
 			}})
-		defer func() { config.Defaults = flam.Bag{} }()
+		defer func() { Defaults = flam.Bag{} }()
 
 		container := dig.New()
 		require.NoError(t, flamTime.NewProvider().Register(container))
-		require.NoError(t, config.NewProvider().Register(container))
+		require.NoError(t, NewProvider().Register(container))
 
 		data1 := "field: value"
 		reader1 := func(b []byte) (int, error) {
@@ -725,36 +723,36 @@ func Test_observableFileSource_Reload(t *testing.T) {
 			return len(data2), io.EOF
 		}
 
-		file := mocks.NewFile(ctrl)
+		file := NewFileMock(ctrl)
 		file.EXPECT().Read(gomock.Any()).DoAndReturn(reader1)
 		file.EXPECT().Read(gomock.Any()).DoAndReturn(reader2)
 		file.EXPECT().Close().Return(nil).Times(2)
 
 		now := time.Now()
 		future := now.AddDate(1, 0, 0)
-		fileInfo := mocks.NewFileInfo(ctrl)
+		fileInfo := NewFileInfoMock(ctrl)
 		fileInfo.EXPECT().ModTime().Return(now)
 		fileInfo.EXPECT().ModTime().Return(future)
 
-		disk := mocks.NewDisk(ctrl)
+		disk := NewDiskMock(ctrl)
 		disk.EXPECT().Stat("/testdata/config").Return(fileInfo, nil).Times(2)
 		disk.EXPECT().
 			OpenFile("/testdata/config", os.O_RDONLY, os.FileMode(0o644)).
 			Return(file, nil).
 			Times(2)
 
-		fsFacade := mocks.NewFileSystemFacade(ctrl)
+		fsFacade := NewFileSystemFacadeMock(ctrl)
 		fsFacade.EXPECT().GetDisk("my_disk").Return(disk, nil).Times(1)
 		require.NoError(t, container.Provide(func() filesystem.Facade { return fsFacade }))
 
-		require.NoError(t, config.NewProvider().(flam.BootableProvider).Boot(container))
+		require.NoError(t, NewProvider().(flam.BootableProvider).Boot(container))
 
-		assert.NoError(t, container.Invoke(func(facade config.Facade) {
+		assert.NoError(t, container.Invoke(func(facade Facade) {
 			got, e := facade.GetSource("my_source")
 			require.NotNil(t, got)
 			require.NoError(t, e)
 
-			reloaded, e := got.(config.ObservableSource).Reload()
+			reloaded, e := got.(ObservableSource).Reload()
 			require.True(t, reloaded)
 			require.NoError(t, e)
 
