@@ -1,0 +1,33 @@
+version: '3'
+
+tasks:
+  githooks:
+    desc: register the project githooks
+    preconditions:
+      - test -f ./.githooks/pre-commit
+    cmds:
+      - git config --local include.path ../.gitconfig
+
+  format:
+    desc: run the linter formatter against the code base
+    cmds:
+      - golangci-lint fmt
+
+  lint:
+    desc: run the linter against the code base
+    cmds:
+      - golangci-lint run
+
+  tests:
+    desc: run the code base test suites
+    cmds:
+      - go test -v ./...
+
+  tests-coverage:
+    desc: run the code base test suites with coverage
+    cmds:
+      - go test -v -cover ./...
+
+  default:
+    cmds:
+      - task --list-all
